@@ -5,6 +5,7 @@ import seaborn as sns
 import plotly.express as px
 from io import BytesIO
 
+
 # Streamlit application title
 st.title("Persona Analysis Dashboard")
 
@@ -33,7 +34,7 @@ if uploaded_file is not None:
     filtered_persona_details_df, filtered_tags_with_factions = filter_data(persona_details_df, selected_factions)
 
     # Function to create charts
-    def create_charts(filtered_tags_with_factions, factions, persona_details_df, selected_tags, tw_followers_range):
+    def create_charts(filtered_tags_with_factions, factions, persona_details_df):
         # Set font size for charts
         plt.rcParams.update({'font.size': 8})
 
@@ -112,41 +113,13 @@ if uploaded_file is not None:
 
         # Table of persona details
         st.subheader("Persona Details")
-        persona_details_table = persona_details_df[['Name', 'Handle', 'Faction', 'Tags', 'Bio', 'TwFollowers', 'TwFollowing']]
+        persona_details_table = persona_details_df[['Name', 'Handle', 'Faction', 'Tags', 'Bio']]
         st.dataframe(persona_details_table)
 
-        # Twitter Followers filter
-        tw_followers_range = st.selectbox("Filter by Twitter Followers", options=["All", "<200", "200-1000", "1000-2000", "3000-6000", "6000-20000", ">20000"])
-
-        # Filter persona details based on Twitter Followers range
-        if tw_followers_range != "All":
-            if tw_followers_range == "<200":
-                filtered_df = persona_details_df[persona_details_df['TwFollowers'] < 200]
-            elif tw_followers_range == "200-1000":
-                filtered_df = persona_details_df[(persona_details_df['TwFollowers'] >= 200) & (persona_details_df['TwFollowers'] <= 1000)]
-            elif tw_followers_range == "1000-2000":
-                filtered_df = persona_details_df[(persona_details_df['TwFollowers'] >= 1000) & (persona_details_df['TwFollowers'] <= 2000)]
-            elif tw_followers_range == "3000-6000":
-                filtered_df = persona_details_df[(persona_details_df['TwFollowers'] >= 3000) & (persona_details_df['TwFollowers'] <= 6000)]
-            elif tw_followers_range == "6000-20000":
-                filtered_df = persona_details_df[(persona_details_df['TwFollowers'] >= 6000) & (persona_details_df['TwFollowers'] <= 20000)]
-            elif tw_followers_range == ">20000":
-                filtered_df = persona_details_df[persona_details_df['TwFollowers'] > 20000]
-        else:
-            filtered_df = persona_details_df
-
-        # Heatmap of TwFollowers and TwFollowing
-        st.subheader("Heatmap of Twitter Followers and Following")
-        fig, ax = plt.subplots(figsize=(12, 8))
-        heatmap_data = pd.pivot_table(filtered_df, values='Name', index='TwFollowers', columns='TwFollowing', aggfunc='count', fill_value=0)
-        sns.heatmap(heatmap_data, annot=True, fmt="d", cmap="YlGnBu", ax=ax)
-        ax.set_xlabel("Twitter Following")
-        ax.set_ylabel("Twitter Followers")
-        ax.set_title("Heatmap of Twitter Followers and Following")
-        st.pyplot(fig)
+       
 
     # Initial chart creation
-    create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df, None, None)
+    create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df)
 
     # Search and replace tags
     st.subheader("Search and Replace Tags")
@@ -170,7 +143,7 @@ if uploaded_file is not None:
             filtered_persona_details_df, filtered_tags_with_factions = filter_data(persona_details_df, selected_factions)
             
             # Recreate charts with updated tags
-            create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df, None, None)
+            create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df)
         else:
             st.error("Please provide both search and replace tags.")
 
