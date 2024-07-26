@@ -21,16 +21,16 @@ if uploaded_file is not None:
     tags_with_factions = tags_with_factions.set_index('Faction')['Tags'].str.split(',', expand=True).stack().reset_index(name='Tag')
 
     # Faction selection
-    selected_faction = st.selectbox("Select a Faction", options=factions.unique())
+    selected_factions = st.multiselect("Select Factions", options=factions.unique(), default=factions.unique())
 
-    # Filter data based on selected faction
-    def filter_data(df, faction):
-        filtered_df = df[df['Faction'] == faction]
+    # Filter data based on selected factions
+    def filter_data(df, factions):
+        filtered_df = df[df['Faction'].isin(factions)]
         filtered_tags_df = filtered_df[['Faction', 'Tags']].copy()
         filtered_tags_df = filtered_tags_df.set_index('Faction')['Tags'].str.split(',', expand=True).stack().reset_index(name='Tag')
         return filtered_df, filtered_tags_df
 
-    filtered_persona_details_df, filtered_tags_with_factions = filter_data(persona_details_df, selected_faction)
+    filtered_persona_details_df, filtered_tags_with_factions = filter_data(persona_details_df, selected_factions)
 
     # Function to create charts
     def create_charts(filtered_tags_with_factions, factions):
@@ -106,7 +106,7 @@ if uploaded_file is not None:
             st.success(f"Replaced '{search_tag}' with '{replace_tag}' in tags.")
             
             # Filter data again after replacement
-            filtered_persona_details_df, filtered_tags_with_factions = filter_data(persona_details_df, selected_faction)
+            filtered_persona_details_df, filtered_tags_with_factions = filter_data(persona_details_df, selected_factions)
             
             # Recreate charts with updated tags
             create_charts(filtered_tags_with_factions, factions)
