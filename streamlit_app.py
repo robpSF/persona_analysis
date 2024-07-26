@@ -95,7 +95,12 @@ if uploaded_file is not None:
     if st.button("Replace Tags"):
         if search_tag and replace_tag:
             # Perform the replacement
-            persona_details_df['Tags'] = persona_details_df['Tags'].str.replace(search_tag, replace_tag, case=False, regex=False)
+            def replace_tags(tags, search, replace):
+                if pd.isna(tags):
+                    return tags
+                return ','.join([replace if tag.strip().lower() == search.lower() else tag for tag in tags.split(',')])
+
+            persona_details_df['Tags'] = persona_details_df['Tags'].apply(lambda x: replace_tags(x, search_tag, replace_tag))
             st.success(f"Replaced '{search_tag}' with '{replace_tag}' in tags.")
             
             # Filter data again after replacement
@@ -114,7 +119,7 @@ if uploaded_file is not None:
             persona_details_df.to_excel(writer, index=False, sheet_name='Sheet1')
         st.download_button(
             label="Download Excel file",
-            data=buffer,
+            data=buffer.getvalue(),
             file_name="modified_persona_details.xlsx",
             mime="application/vnd.ms-excel"
         )
