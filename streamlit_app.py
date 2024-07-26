@@ -13,7 +13,7 @@ from folium.plugins import MarkerCluster
 st.title("Persona Analysis Dashboard")
 
 # File uploader
-uploaded_file = st.file_uploader("Upload your Excel file", type=["xlsx"])
+uploaded_file = st.file_uploader("Upload your Excel file", type=["xlsx"], key="file_uploader")
 
 if uploaded_file is not None:
     # Read the uploaded Excel file
@@ -25,7 +25,7 @@ if uploaded_file is not None:
     tags_with_factions = tags_with_factions.set_index('Faction')['Tags'].str.split(',', expand=True).stack().reset_index(name='Tag')
 
     # Faction selection
-    selected_factions = st.multiselect("Select Factions", options=factions.unique(), default=factions.unique(),key="faction_select")
+    selected_factions = st.multiselect("Select Factions", options=factions.unique(), default=factions.unique(), key="faction_select")
 
     # Filter data based on selected factions
     def filter_data(df, factions):
@@ -100,7 +100,7 @@ if uploaded_file is not None:
 
         # Multi-select tag filter for heatmap
         all_tags = sorted(filtered_tags_with_factions['Tag'].unique())
-        selected_tags = st.multiselect("Select Tags for Heatmap", options=all_tags, default=all_tags,key="tag_select")
+        selected_tags = st.multiselect("Select Tags for Heatmap", options=all_tags, default=all_tags, key="tag_select")
 
         # Chart (e): Heatmap of tag combinations
         st.subheader("Heatmap of Tag Combinations")
@@ -116,13 +116,13 @@ if uploaded_file is not None:
 
         # Table with Name, Handle, Faction, Tags, Bio
         st.subheader("Persona Details")
-        st.dataframe(persona_details_df[['Name', 'Handle', 'Faction', 'Tags', 'Bio']])
+        st.dataframe(persona_details_df[['Name', 'Handle', 'Faction', 'Tags', 'Bio']], key="persona_table")
 
         # Map with GPS coordinates and Image column
         st.subheader("Map of Personas")
 
         # Display option for map markers
-        display_option = st.radio("Select Map Marker Display:", ('Pins', 'Images'),key="radio_select")
+        display_option = st.radio("Select Map Marker Display:", ('Pins', 'Images'), key="display_option")
 
         # Filter out rows without valid GPS data
         valid_gps = persona_details_df.dropna(subset=['GPS'])
@@ -159,10 +159,10 @@ if uploaded_file is not None:
 
     # Search and replace tags
     st.subheader("Search and Replace Tags")
-    search_tag = st.text_input("Tag to search for",key="search_tag")
-    replace_tag = st.text_input("Tag to replace with",key="replace_tag")
+    search_tag = st.text_input("Tag to search for", key="search_tag")
+    replace_tag = st.text_input("Tag to replace with", key="replace_tag")
     
-    if st.button("Replace Tags",key="replace_button"):
+    if st.button("Replace Tags", key="replace_button"):
         if search_tag and replace_tag:
             # Perform the replacement
             def replace_tags(tags, search, replace):
@@ -194,7 +194,7 @@ if uploaded_file is not None:
         data=buffer,
         file_name="modified_persona_details.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        key="download_button1"
+        key="download_button"
     )
 
 else:
