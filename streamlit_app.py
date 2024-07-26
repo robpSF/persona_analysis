@@ -34,6 +34,19 @@ if uploaded_file is not None:
 
     filtered_persona_details_df, filtered_tags_with_factions = filter_data(persona_details_df, selected_factions)
 
+    # Multi-select tag filter for heatmap, table, and map
+    all_tags = sorted(filtered_tags_with_factions['Tag'].unique())
+    selected_tags = st.multiselect("Select Tags for Heatmap, Table, and Map", options=all_tags, default=all_tags)
+
+    # Apply tag filter
+    def apply_tag_filter(df, tags):
+        return df[df['Tags'].apply(lambda x: any(tag in x.split(',') for tag in tags))]
+
+    filtered_persona_details_df = apply_tag_filter(filtered_persona_details_df, selected_tags)
+
+    # Map display mode selection
+    map_display_mode = st.selectbox("Select Map Display Mode", options=["Pins", "Images"])
+
     # Function to create charts
     def create_charts(filtered_tags_with_factions, factions, persona_details_df):
         # Set font size for charts
@@ -96,10 +109,6 @@ if uploaded_file is not None:
         ax.set_title("Number of Audience Segments")
         st.pyplot(fig)
 
-        # Multi-select tag filter for heatmap
-        all_tags = sorted(filtered_tags_with_factions['Tag'].unique())
-        selected_tags = st.multiselect("Select Tags for Heatmap", options=all_tags, default=all_tags)
-
         # Chart (e): Heatmap of tag combinations
         st.subheader("Heatmap of Tag Combinations")
         tags_expanded = persona_details_df['Tags'].str.get_dummies(sep=',')
@@ -126,13 +135,19 @@ if uploaded_file is not None:
         # Create a Folium map
         m = folium.Map(location=[valid_gps['lat'].mean(), valid_gps['lon'].mean()], zoom_start=3)
 
-        # Add pins to the map
+        # Add pins or images to the map
         for idx, row in valid_gps.iterrows():
-            folium.Marker(
-                location=[row['lat'], row['lon']],
-                popup=folium.Popup(f"<b>{row['Name']}</b><br>{row['Handle']}<br>{row['Faction']}<br>{row['Tags']}", max_width=300),
-                icon=folium.Icon(color='blue', icon='info-sign')
-            ).add_to(m)
+            if map_display_mode == "Pins":
+                folium.Marker(
+                    location=[row['lat'], row['lon']],
+                    popup=folium.Popup(f"<b>{row['Name']}</b><br>{row['Handle']}<br>{row['Faction']}<br>{row['Tags']}", max_width=300),
+                    icon=folium.Icon(color='blue', icon='info-sign')
+                ).add_to(m)
+            elif map_display_mode == "Images" and pd.notna(row['Image']):
+                folium.Marker(
+                    location=[row['lat'], row['lon']],
+                    popup=folium.Popup(f"<b>{row['Name']}</b><br>{row['Handle']}<br>{row['Faction']}<br>{row['Tags']}<br><img src='{row['Image']}' width='100'/>", max_width=300)
+                ).add_to(m)
 
         # Display the map
         folium_static(m)
@@ -160,6 +175,7 @@ if uploaded_file is not None:
             
             # Filter data again after replacement
             filtered_persona_details_df, filtered_tags_with_factions = filter_data(persona_details_df, selected_factions)
+            filtered_persona_details_df = apply_tag_filter(filtered_persona_details_df, selected_tags)
             
             # Recreate charts with updated tags
             create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df)
