@@ -6,6 +6,7 @@ import plotly.express as px
 import folium
 from io import BytesIO
 from streamlit_folium import folium_static
+from folium.plugins import MarkerCluster
 
 # Streamlit application title
 st.title("Persona Analysis Dashboard")
@@ -119,20 +120,31 @@ if uploaded_file is not None:
         # Map with GPS coordinates and Image column
         st.subheader("Map of Personas")
 
+        # Display option for map markers
+        display_option = st.radio("Select Map Marker Display:", ('Pins', 'Images'))
+
         # Filter out rows without valid GPS data
         valid_gps = persona_details_df.dropna(subset=['GPS'])
         valid_gps[['lat', 'lon']] = valid_gps['GPS'].str.split(',', expand=True).astype(float)
 
         # Create a Folium map
         m = folium.Map(location=[valid_gps['lat'].mean(), valid_gps['lon'].mean()], zoom_start=3)
+        marker_cluster = MarkerCluster().add_to(m)
 
-        # Add pins to the map
+        # Add pins or images to the map
         for idx, row in valid_gps.iterrows():
-            folium.Marker(
-                location=[row['lat'], row['lon']],
-                popup=folium.Popup(f"<b>{row['Name']}</b><br>{row['Handle']}<br>{row['Faction']}<br>{row['Tags']}", max_width=300),
-                icon=folium.Icon(color='blue', icon='info-sign')
-            ).add_to(m)
+            if display_option == 'Pins':
+                folium.Marker(
+                    location=[row['lat'], row['lon']],
+                    popup=folium.Popup(f"<b>{row['Name']}</b><br>{row['Handle']}<br>{row['Faction']}<br>{row['Tags']}", max_width=300),
+                    icon=folium.Icon(color='blue', icon='info-sign')
+                ).add_to(marker_cluster)
+            elif display_option == 'Images' and pd.notna(row['Image']):
+                folium.Marker(
+                    location=[row['lat'], row['lon']],
+                    popup=folium.Popup(f"<img src='{row['Image']}' width='100'><br><b>{row['Name']}</b><br>{row['Handle']}<br>{row['Faction']}<br>{row['Tags']}", max_width=300),
+                    icon=folium.Icon(color='blue', icon='info-sign')
+                ).add_to(marker_cluster)
 
         # Display the map
         folium_static(m)
