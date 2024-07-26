@@ -98,7 +98,9 @@ if uploaded_file is not None:
             def replace_tags(tags, search, replace):
                 if pd.isna(tags):
                     return tags
-                return ','.join([replace if tag.strip().lower() == search.lower() else tag for tag in tags.split(',')])
+                updated_tags = [replace if tag.strip().lower() == search.lower() else tag for tag in tags.split(',')]
+                unique_tags = list(dict.fromkeys(updated_tags))  # Remove duplicates while preserving order
+                return ','.join(unique_tags)
 
             persona_details_df['Tags'] = persona_details_df['Tags'].apply(lambda x: replace_tags(x, search_tag, replace_tag))
             st.success(f"Replaced '{search_tag}' with '{replace_tag}' in tags.")
