@@ -140,9 +140,20 @@ if uploaded_file is not None:
                     icon=folium.Icon(color='blue', icon='info-sign')
                 ).add_to(marker_cluster)
             elif display_option == 'Images' and pd.notna(row['Image']):
+                html = f'''
+                    <div style="text-align: center;">
+                        <img src="{row['Image']}" width="100" height="100"><br>
+                        <b>{row['Name']}</b><br>
+                        {row['Handle']}<br>
+                        {row['Faction']}<br>
+                        {row['Tags']}
+                    </div>
+                '''
+                iframe = folium.IFrame(html, width=150, height=200)
+                popup = folium.Popup(iframe, max_width=300)
                 folium.Marker(
                     location=[row['lat'], row['lon']],
-                    popup=folium.Popup(f"<img src='{row['Image']}' width='100'><br><b>{row['Name']}</b><br>{row['Handle']}<br>{row['Faction']}<br>{row['Tags']}", max_width=300),
+                    popup=popup,
                     icon=folium.Icon(color='blue', icon='info-sign')
                 ).add_to(marker_cluster)
 
