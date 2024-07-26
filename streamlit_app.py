@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
+from io import BytesIO
 
 # Streamlit application title
 st.title("Persona Analysis Dashboard")
@@ -75,5 +76,33 @@ if uploaded_file is not None:
     )
 
     st.plotly_chart(fig)
+
+    # Search and replace tags
+    st.subheader("Search and Replace Tags")
+    search_tag = st.text_input("Tag to search for")
+    replace_tag = st.text_input("Tag to replace with")
+    
+    if st.button("Replace Tags"):
+        if search_tag and replace_tag:
+            # Perform the replacement
+            persona_details_df['Tags'] = persona_details_df['Tags'].str.replace(search_tag, replace_tag, case=False, regex=False)
+            st.success(f"Replaced '{search_tag}' with '{replace_tag}' in tags.")
+        else:
+            st.error("Please provide both search and replace tags.")
+
+    # Export modified DataFrame to Excel
+    st.subheader("Export Modified Data")
+    if st.button("Export to Excel"):
+        buffer = BytesIO()
+        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+            persona_details_df.to_excel(writer, index=False, sheet_name='Sheet1')
+            writer.save()
+            st.download_button(
+                label="Download Excel file",
+                data=buffer,
+                file_name="modified_persona_details.xlsx",
+                mime="application/vnd.ms-excel"
+            )
+
 else:
     st.write("Please upload an Excel file to proceed.")
