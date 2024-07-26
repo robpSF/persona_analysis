@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
+import pydeck as pdk
 from io import BytesIO
 
 # Streamlit application title
@@ -109,6 +110,40 @@ if uploaded_file is not None:
         ax.set_ylabel("Tags")
         ax.set_title("Heatmap of Tag Combinations")
         st.pyplot(fig)
+
+        # Table with Name, Handle, Faction, Tags, Bio
+        st.subheader("Persona Details")
+        st.dataframe(persona_details_df[['Name', 'Handle', 'Faction', 'Tags', 'Bio']])
+
+        # Map with GPS coordinates and Image column
+        st.subheader("Map of Personas")
+        persona_details_df['lat'] = persona_details_df['GPS'].apply(lambda x: float(str(x).split(',')[0]))
+        persona_details_df['lon'] = persona_details_df['GPS'].apply(lambda x: float(str(x).split(',')[1]))
+
+        layer = pdk.Layer(
+            "ScatterplotLayer",
+            data=persona_details_df,
+            get_position='[lon, lat]',
+            get_color='[200, 30, 0, 160]',
+            get_radius=200,
+            pickable=True,
+            auto_highlight=True
+        )
+
+        view_state = pdk.ViewState(
+            latitude=persona_details_df['lat'].mean(),
+            longitude=persona_details_df['lon'].mean(),
+            zoom=3,
+            pitch=0
+        )
+
+        r = pdk.Deck(
+            layers=[layer],
+            initial_view_state=view_state,
+            tooltip={"text": "{Name}\n{Handle}\n{Faction}\n{Tags}"}
+        )
+
+        st.pydeck_chart(r)
 
     # Initial chart creation
     create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df)
