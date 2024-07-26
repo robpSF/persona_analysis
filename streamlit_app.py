@@ -16,6 +16,9 @@ st.title("Persona Analysis Dashboard")
 if 'widget_count' not in st.session_state:
     st.session_state.widget_count = 0
 
+if 'persona_details_df' not in st.session_state:
+    st.session_state.persona_details_df = None
+
 def get_unique_key():
     key = f"widget_{st.session_state.widget_count}"
     st.session_state.widget_count += 1
@@ -142,10 +145,10 @@ def create_charts(filtered_tags_with_factions, factions, persona_details_df):
 # File uploader
 uploaded_file = st.file_uploader("Upload your Excel file", type=["xlsx"], key=get_unique_key())
 
-if uploaded_file is not None or 'persona_details_df' in st.session_state:
-    if uploaded_file is not None:
-        st.session_state.persona_details_df = pd.read_excel(uploaded_file)
+if uploaded_file is not None:
+    st.session_state.persona_details_df = pd.read_excel(uploaded_file)
 
+if st.session_state.persona_details_df is not None:
     persona_details_df = st.session_state.persona_details_df
     
     # Extract relevant columns
