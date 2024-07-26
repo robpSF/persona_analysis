@@ -110,6 +110,11 @@ if uploaded_file is not None:
         ax.set_title("Heatmap of Tag Combinations")
         st.pyplot(fig)
 
+        # Table of persona details
+        st.subheader("Persona Details")
+        persona_details_table = persona_details_df[['Name', 'Handle', 'Faction', 'Tags', 'Bio']]
+        st.dataframe(persona_details_table)
+
     # Initial chart creation
     create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df)
 
