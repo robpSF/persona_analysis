@@ -112,13 +112,12 @@ if uploaded_file is not None:
         buffer = BytesIO()
         with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
             persona_details_df.to_excel(writer, index=False, sheet_name='Sheet1')
-            writer.save()
-            st.download_button(
-                label="Download Excel file",
-                data=buffer,
-                file_name="modified_persona_details.xlsx",
-                mime="application/vnd.ms-excel"
-            )
+        st.download_button(
+            label="Download Excel file",
+            data=buffer,
+            file_name="modified_persona_details.xlsx",
+            mime="application/vnd.ms-excel"
+        )
 
 else:
     st.write("Please upload an Excel file to proceed.")
