@@ -34,19 +34,6 @@ if uploaded_file is not None:
 
     filtered_persona_details_df, filtered_tags_with_factions = filter_data(persona_details_df, selected_factions)
 
-    # Multi-select tag filter for heatmap, table, and map
-    all_tags = sorted(filtered_tags_with_factions['Tag'].unique())
-    selected_tags = st.multiselect("Select Tags for Heatmap, Table, and Map", options=all_tags, default=all_tags)
-
-    # Apply tag filter
-    def apply_tag_filter(df, tags):
-        return df[df['Tags'].apply(lambda x: any(tag in x.split(',') for tag in tags))]
-
-    filtered_persona_details_df = apply_tag_filter(filtered_persona_details_df, selected_tags)
-
-    # Map display mode selection
-    map_display_mode = st.selectbox("Select Map Display Mode", options=["Pins", "Images"])
-
     # Function to create charts
     def create_charts(filtered_tags_with_factions, factions, persona_details_df):
         # Set font size for charts
@@ -98,17 +85,35 @@ if uploaded_file is not None:
         )
 
         st.plotly_chart(fig)
-        
-        # Chart (d): Number of audience segments
-        st.subheader("Number of Audience Segments")
-        segment_counts = persona_details_df['Tags'].value_counts()
-        fig, ax = plt.subplots()
-        segment_counts.plot(kind='barh', ax=ax)
-        ax.set_xlabel("Number of Personas")
-        ax.set_ylabel("Audience Segments")
-        ax.set_title("Number of Audience Segments")
-        st.pyplot(fig)
 
+    # Initial chart creation
+    create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df)
+
+    # Chart (d): Number of audience segments
+    st.subheader("Number of Audience Segments")
+    segment_counts = persona_details_df['Tags'].value_counts()
+    fig, ax = plt.subplots()
+    segment_counts.plot(kind='barh', ax=ax)
+    ax.set_xlabel("Number of Personas")
+    ax.set_ylabel("Audience Segments")
+    ax.set_title("Number of Audience Segments")
+    st.pyplot(fig)
+
+    # Multi-select tag filter for heatmap, table, and map
+    all_tags = sorted(filtered_tags_with_factions['Tag'].unique())
+    selected_tags = st.multiselect("Select Tags for Heatmap, Table, and Map", options=all_tags, default=all_tags)
+
+    # Apply tag filter
+    def apply_tag_filter(df, tags):
+        return df[df['Tags'].apply(lambda x: any(tag in x.split(',') for tag in tags))]
+
+    filtered_persona_details_df = apply_tag_filter(filtered_persona_details_df, selected_tags)
+
+    # Map display mode selection
+    map_display_mode = st.selectbox("Select Map Display Mode", options=["Pins", "Images"])
+
+    # Function to create additional charts and visualizations
+    def create_additional_visuals(persona_details_df):
         # Chart (e): Heatmap of tag combinations
         st.subheader("Heatmap of Tag Combinations")
         tags_expanded = persona_details_df['Tags'].str.get_dummies(sep=',')
@@ -152,8 +157,8 @@ if uploaded_file is not None:
         # Display the map
         folium_static(m)
 
-    # Initial chart creation
-    create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df)
+    # Create additional visualizations
+    create_additional_visuals(filtered_persona_details_df)
 
     # Search and replace tags
     st.subheader("Search and Replace Tags")
@@ -179,6 +184,7 @@ if uploaded_file is not None:
             
             # Recreate charts with updated tags
             create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df)
+            create_additional_visuals(filtered_persona_details_df)
         else:
             st.error("Please provide both search and replace tags.")
 
