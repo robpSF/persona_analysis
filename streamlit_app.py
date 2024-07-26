@@ -33,7 +33,7 @@ if uploaded_file is not None:
     filtered_persona_details_df, filtered_tags_with_factions = filter_data(persona_details_df, selected_factions)
 
     # Function to create charts
-    def create_charts(filtered_tags_with_factions, factions):
+    def create_charts(filtered_tags_with_factions, factions, persona_details_df):
         # Set font size for charts
         plt.rcParams.update({'font.size': 8})
 
@@ -56,7 +56,7 @@ if uploaded_file is not None:
         ax.set_ylabel("Tags")
         ax.set_title("Number of Personas per Tags")
         st.pyplot(fig)
-
+        
         # Chart (c): Number of Personas per Tags within each Faction
         st.subheader("Number of Personas per Tags within each Faction")
         tag_faction_counts = filtered_tags_with_factions.groupby(['Faction', 'Tag']).size().unstack(fill_value=0)
@@ -83,9 +83,19 @@ if uploaded_file is not None:
         )
 
         st.plotly_chart(fig)
+        
+        # Chart (d): Number of audience segments
+        st.subheader("Number of Audience Segments")
+        segment_counts = persona_details_df['Tags'].value_counts()
+        fig, ax = plt.subplots()
+        segment_counts.plot(kind='barh', ax=ax)
+        ax.set_xlabel("Number of Personas")
+        ax.set_ylabel("Audience Segments")
+        ax.set_title("Number of Audience Segments")
+        st.pyplot(fig)
 
     # Initial chart creation
-    create_charts(filtered_tags_with_factions, factions)
+    create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df)
 
     # Search and replace tags
     st.subheader("Search and Replace Tags")
@@ -109,7 +119,7 @@ if uploaded_file is not None:
             filtered_persona_details_df, filtered_tags_with_factions = filter_data(persona_details_df, selected_factions)
             
             # Recreate charts with updated tags
-            create_charts(filtered_tags_with_factions, factions)
+            create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df)
         else:
             st.error("Please provide both search and replace tags.")
 
