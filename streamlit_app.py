@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 import folium
+from folium.features import CustomIcon
 from io import BytesIO
 from streamlit_folium import folium_static
 from folium.plugins import MarkerCluster
@@ -140,21 +141,14 @@ if uploaded_file is not None:
                     icon=folium.Icon(color='blue', icon='info-sign')
                 ).add_to(marker_cluster)
             elif display_option == 'Images' and pd.notna(row['Image']):
-                html = f'''
-                    <div style="text-align: center;">
-                        <img src="{row['Image']}" width="100" height="100"><br>
-                        <b>{row['Name']}</b><br>
-                        {row['Handle']}<br>
-                        {row['Faction']}<br>
-                        {row['Tags']}
-                    </div>
-                '''
-                iframe = folium.IFrame(html, width=150, height=200)
-                popup = folium.Popup(iframe, max_width=300)
+                icon = CustomIcon(
+                    icon_image=row['Image'], 
+                    icon_size=(50, 50),  # Adjust the size as needed
+                )
                 folium.Marker(
                     location=[row['lat'], row['lon']],
-                    popup=popup,
-                    icon=folium.Icon(color='blue', icon='info-sign')
+                    popup=folium.Popup(f"<b>{row['Name']}</b><br>{row['Handle']}<br>{row['Faction']}<br>{row['Tags']}", max_width=300),
+                    icon=icon
                 ).add_to(marker_cluster)
 
         # Display the map
