@@ -98,7 +98,7 @@ if uploaded_file is not None:
             def replace_tags(tags, search, replace):
                 if pd.isna(tags):
                     return tags
-                updated_tags = [replace if tag.strip().lower() == search.lower() else tag for tag in tags.split(',')]
+                updated_tags = [replace if tag == search else tag for tag in tags.split(',')]
                 unique_tags = list(dict.fromkeys(updated_tags))  # Remove duplicates while preserving order
                 return ','.join(unique_tags)
 
