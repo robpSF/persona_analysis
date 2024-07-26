@@ -94,6 +94,17 @@ if uploaded_file is not None:
         ax.set_title("Number of Audience Segments")
         st.pyplot(fig)
 
+        # Chart (e): Heatmap of tag combinations
+        st.subheader("Heatmap of Tag Combinations")
+        tag_combinations = persona_details_df['Tags'].str.get_dummies(sep=',')
+        tag_combinations_sum = tag_combinations.groupby(persona_details_df['Tags']).sum()
+        fig, ax = plt.subplots(figsize=(12, 8))
+        sns.heatmap(tag_combinations_sum.T, annot=True, fmt="d", cmap="YlGnBu", ax=ax)
+        ax.set_xlabel("Audience Segments")
+        ax.set_ylabel("Tags")
+        ax.set_title("Heatmap of Tag Combinations")
+        st.pyplot(fig)
+
     # Initial chart creation
     create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df)
 
