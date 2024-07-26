@@ -117,7 +117,6 @@ if uploaded_file is not None:
         buffer = BytesIO()
         with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
             persona_details_df.to_excel(writer, index=False, sheet_name='Sheet1')
-            writer.save()
         buffer.seek(0)
         st.download_button(
             label="Download Excel file",
