@@ -117,12 +117,14 @@ if uploaded_file is not None:
 
         # Map with GPS coordinates and Image column
         st.subheader("Map of Personas")
-        persona_details_df['lat'] = persona_details_df['GPS'].apply(lambda x: float(str(x).split(',')[0]))
-        persona_details_df['lon'] = persona_details_df['GPS'].apply(lambda x: float(str(x).split(',')[1]))
+
+        # Filter out rows without valid GPS data
+        valid_gps = persona_details_df.dropna(subset=['GPS'])
+        valid_gps[['lat', 'lon']] = valid_gps['GPS'].str.split(',', expand=True).astype(float)
 
         layer = pdk.Layer(
             "ScatterplotLayer",
-            data=persona_details_df,
+            data=valid_gps,
             get_position='[lon, lat]',
             get_color='[200, 30, 0, 160]',
             get_radius=200,
@@ -131,8 +133,8 @@ if uploaded_file is not None:
         )
 
         view_state = pdk.ViewState(
-            latitude=persona_details_df['lat'].mean(),
-            longitude=persona_details_df['lon'].mean(),
+            latitude=valid_gps['lat'].mean(),
+            longitude=valid_gps['lon'].mean(),
             zoom=3,
             pitch=0
         )
