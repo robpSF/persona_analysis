@@ -32,12 +32,8 @@ if uploaded_file is not None:
 
     filtered_persona_details_df, filtered_tags_with_factions = filter_data(persona_details_df, selected_factions)
 
-    # Get unique tags for multi-select filter
-    all_tags = sorted(tags_with_factions['Tag'].unique())
-    selected_tags = st.multiselect("Select Tags", options=all_tags, default=all_tags)
-
     # Function to create charts
-    def create_charts(filtered_tags_with_factions, factions, persona_details_df, selected_tags):
+    def create_charts(filtered_tags_with_factions, factions, persona_details_df):
         # Set font size for charts
         plt.rcParams.update({'font.size': 8})
 
@@ -98,6 +94,10 @@ if uploaded_file is not None:
         ax.set_title("Number of Audience Segments")
         st.pyplot(fig)
 
+        # Multi-select tag filter for heatmap
+        all_tags = sorted(filtered_tags_with_factions['Tag'].unique())
+        selected_tags = st.multiselect("Select Tags for Heatmap", options=all_tags, default=all_tags)
+
         # Chart (e): Heatmap of tag combinations
         st.subheader("Heatmap of Tag Combinations")
         tags_expanded = persona_details_df['Tags'].str.get_dummies(sep=',')
@@ -111,7 +111,7 @@ if uploaded_file is not None:
         st.pyplot(fig)
 
     # Initial chart creation
-    create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df, selected_tags)
+    create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df)
 
     # Search and replace tags
     st.subheader("Search and Replace Tags")
@@ -135,7 +135,7 @@ if uploaded_file is not None:
             filtered_persona_details_df, filtered_tags_with_factions = filter_data(persona_details_df, selected_factions)
             
             # Recreate charts with updated tags
-            create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df, selected_tags)
+            create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df)
         else:
             st.error("Please provide both search and replace tags.")
 
