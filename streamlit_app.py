@@ -197,13 +197,13 @@ if uploaded_file is not None or 'persona_details_df' in st.session_state:
     buffer = BytesIO()
     with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
         persona_details_df.to_excel(writer, index=False, sheet_name='Sheet1')
-    buffer.seek(0)  
+    buffer.seek(0)
     st.download_button(
         label="Download Excel file",
         data=buffer,
         file_name="modified_persona_details.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        key="download_button"
+        key=get_unique_key()
     )
 
 else:
