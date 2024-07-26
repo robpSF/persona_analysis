@@ -3,8 +3,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
-import pydeck as pdk
+import folium
 from io import BytesIO
+from streamlit_folium import folium_static
 
 # Streamlit application title
 st.title("Persona Analysis Dashboard")
@@ -122,30 +123,19 @@ if uploaded_file is not None:
         valid_gps = persona_details_df.dropna(subset=['GPS'])
         valid_gps[['lat', 'lon']] = valid_gps['GPS'].str.split(',', expand=True).astype(float)
 
-        layer = pdk.Layer(
-            "ScatterplotLayer",
-            data=valid_gps,
-            get_position='[lon, lat]',
-            get_color='[200, 30, 0, 160]',
-            get_radius=200,
-            pickable=True,
-            auto_highlight=True
-        )
+        # Create a Folium map
+        m = folium.Map(location=[valid_gps['lat'].mean(), valid_gps['lon'].mean()], zoom_start=3)
 
-        view_state = pdk.ViewState(
-            latitude=valid_gps['lat'].mean(),
-            longitude=valid_gps['lon'].mean(),
-            zoom=3,
-            pitch=0
-        )
+        # Add pins to the map
+        for idx, row in valid_gps.iterrows():
+            folium.Marker(
+                location=[row['lat'], row['lon']],
+                popup=folium.Popup(f"<b>{row['Name']}</b><br>{row['Handle']}<br>{row['Faction']}<br>{row['Tags']}", max_width=300),
+                icon=folium.Icon(color='blue', icon='info-sign')
+            ).add_to(m)
 
-        r = pdk.Deck(
-            layers=[layer],
-            initial_view_state=view_state,
-            tooltip={"text": "{Name}\n{Handle}\n{Faction}\n{Tags}"}
-        )
-
-        st.pydeck_chart(r)
+        # Display the map
+        folium_static(m)
 
     # Initial chart creation
     create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df)
