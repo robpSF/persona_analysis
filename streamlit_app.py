@@ -25,7 +25,7 @@ if uploaded_file is not None:
     tags_with_factions = tags_with_factions.set_index('Faction')['Tags'].str.split(',', expand=True).stack().reset_index(name='Tag')
 
     # Faction selection
-    selected_factions = st.multiselect("Select Factions", options=factions.unique(), default=factions.unique(), key="faction_select")
+    selected_factions = st.multiselect("Select Factions", options=factions.unique(), default=factions.unique())
 
     # Filter data based on selected factions
     def filter_data(df, factions):
@@ -37,7 +37,7 @@ if uploaded_file is not None:
     filtered_persona_details_df, filtered_tags_with_factions = filter_data(persona_details_df, selected_factions)
 
     # Function to create charts
-    def create_charts(filtered_tags_with_factions, factions, persona_details_df, unique_key):
+    def create_charts(filtered_tags_with_factions, factions, persona_details_df):
         # Set font size for charts
         plt.rcParams.update({'font.size': 8})
 
@@ -49,7 +49,7 @@ if uploaded_file is not None:
         ax.set_xlabel("Number of Personas")
         ax.set_ylabel("Faction")
         ax.set_title("Number of Personas per Faction")
-        st.pyplot(fig, key=f"faction_bar_{unique_key}")
+        st.pyplot(fig)
 
         # Chart (b): Horizontal bar chart of number of personas per Tags
         st.subheader("Number of Personas per Tags")
@@ -59,7 +59,7 @@ if uploaded_file is not None:
         ax.set_xlabel("Number of Personas")
         ax.set_ylabel("Tags")
         ax.set_title("Number of Personas per Tags")
-        st.pyplot(fig, key=f"tag_bar_{unique_key}")
+        st.pyplot(fig)
         
         # Chart (c): Number of Personas per Tags within each Faction
         st.subheader("Number of Personas per Tags within each Faction")
@@ -86,7 +86,7 @@ if uploaded_file is not None:
             font=dict(size=8)
         )
 
-        st.plotly_chart(fig, key=f"heatmap_{unique_key}")
+        st.plotly_chart(fig)
         
         # Chart (d): Number of audience segments
         st.subheader("Number of Audience Segments")
@@ -96,11 +96,11 @@ if uploaded_file is not None:
         ax.set_xlabel("Number of Personas")
         ax.set_ylabel("Audience Segments")
         ax.set_title("Number of Audience Segments")
-        st.pyplot(fig, key=f"segment_bar_{unique_key}")
+        st.pyplot(fig)
 
         # Multi-select tag filter for heatmap
         all_tags = sorted(filtered_tags_with_factions['Tag'].unique())
-        selected_tags = st.multiselect("Select Tags for Heatmap", options=all_tags, default=all_tags, key=f"tag_select_{unique_key}")
+        selected_tags = st.multiselect("Select Tags for Heatmap", options=all_tags, default=all_tags)
 
         # Chart (e): Heatmap of tag combinations
         st.subheader("Heatmap of Tag Combinations")
@@ -112,17 +112,17 @@ if uploaded_file is not None:
         ax.set_xlabel("Tags")
         ax.set_ylabel("Tags")
         ax.set_title("Heatmap of Tag Combinations")
-        st.pyplot(fig, key=f"combination_heatmap_{unique_key}")
+        st.pyplot(fig)
 
         # Table with Name, Handle, Faction, Tags, Bio
         st.subheader("Persona Details")
-        st.dataframe(persona_details_df[['Name', 'Handle', 'Faction', 'Tags', 'Bio']], key=f"persona_table_{unique_key}")
+        st.dataframe(persona_details_df[['Name', 'Handle', 'Faction', 'Tags', 'Bio']])
 
         # Map with GPS coordinates and Image column
         st.subheader("Map of Personas")
 
         # Display option for map markers
-        display_option = st.radio("Select Map Marker Display:", ('Pins', 'Images'), key=f"map_display_{unique_key}")
+        display_option = st.radio("Select Map Marker Display:", ('Pins', 'Images'))
 
         # Filter out rows without valid GPS data
         valid_gps = persona_details_df.dropna(subset=['GPS'])
@@ -152,18 +152,17 @@ if uploaded_file is not None:
                 ).add_to(marker_cluster)
 
         # Display the map
-        folium_static(m, key=f"map_{unique_key}")
+        folium_static(m)
 
     # Initial chart creation
-    unique_key = "initial"
-    create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df, unique_key)
+    create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df)
 
     # Search and replace tags
     st.subheader("Search and Replace Tags")
-    search_tag = st.text_input("Tag to search for", key="search_tag")
-    replace_tag = st.text_input("Tag to replace with", key="replace_tag")
+    search_tag = st.text_input("Tag to search for")
+    replace_tag = st.text_input("Tag to replace with")
     
-    if st.button("Replace Tags", key="replace_button"):
+    if st.button("Replace Tags"):
         if search_tag and replace_tag:
             # Perform the replacement
             def replace_tags(tags, search, replace):
@@ -180,8 +179,7 @@ if uploaded_file is not None:
             filtered_persona_details_df, filtered_tags_with_factions = filter_data(persona_details_df, selected_factions)
             
             # Recreate charts with updated tags
-            unique_key = "updated"
-            create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df, unique_key)
+            create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df)
         else:
             st.error("Please provide both search and replace tags.")
 
@@ -195,8 +193,7 @@ if uploaded_file is not None:
         label="Download Excel file",
         data=buffer,
         file_name="modified_persona_details.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        key="download_button"
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
 else:
