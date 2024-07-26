@@ -16,9 +16,15 @@ if uploaded_file is not None:
     
     # Extract relevant columns
     factions = persona_details_df['Faction']
-    tags = persona_details_df['Tags'].str.split(',', expand=True).stack()
     tags_with_factions = persona_details_df[['Faction', 'Tags']].copy()
     tags_with_factions = tags_with_factions.set_index('Faction')['Tags'].str.split(',', expand=True).stack().reset_index(name='Tag')
+
+    # Faction selection
+    selected_faction = st.selectbox("Select a Faction", options=factions.unique())
+
+    # Filter data based on selected faction
+    filtered_persona_details_df = persona_details_df[persona_details_df['Faction'] == selected_faction]
+    filtered_tags_with_factions = tags_with_factions[tags_with_factions['Faction'] == selected_faction]
 
     # Set font size for charts
     plt.rcParams.update({'font.size': 8})
@@ -35,7 +41,7 @@ if uploaded_file is not None:
 
     # Chart (b): Horizontal bar chart of number of personas per Tags
     st.subheader("Number of Personas per Tags")
-    tag_counts = tags.value_counts()
+    tag_counts = filtered_tags_with_factions['Tag'].value_counts()
     fig, ax = plt.subplots()
     tag_counts.plot(kind='barh', ax=ax)
     ax.set_xlabel("Number of Personas")
@@ -45,7 +51,7 @@ if uploaded_file is not None:
 
     # Chart (c): Number of Personas per Tags within each Faction
     st.subheader("Number of Personas per Tags within each Faction")
-    tag_faction_counts = tags_with_factions.groupby(['Faction', 'Tag']).size().unstack(fill_value=0)
+    tag_faction_counts = filtered_tags_with_factions.groupby(['Faction', 'Tag']).size().unstack(fill_value=0)
 
     # Use Plotly for the heatmap with hover functionality
     fig = px.imshow(
