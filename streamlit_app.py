@@ -96,11 +96,11 @@ if uploaded_file is not None:
 
         # Chart (e): Heatmap of tag combinations
         st.subheader("Heatmap of Tag Combinations")
-        tag_combinations = persona_details_df['Tags'].str.get_dummies(sep=',')
-        tag_combinations_sum = tag_combinations.groupby(persona_details_df['Tags']).sum()
+        tags_expanded = persona_details_df['Tags'].str.get_dummies(sep=',')
+        co_occurrence_matrix = tags_expanded.T.dot(tags_expanded)
         fig, ax = plt.subplots(figsize=(12, 8))
-        sns.heatmap(tag_combinations_sum.T, annot=True, fmt="d", cmap="YlGnBu", ax=ax)
-        ax.set_xlabel("Audience Segments")
+        sns.heatmap(co_occurrence_matrix, annot=True, fmt="d", cmap="YlGnBu", ax=ax)
+        ax.set_xlabel("Tags")
         ax.set_ylabel("Tags")
         ax.set_title("Heatmap of Tag Combinations")
         st.pyplot(fig)
