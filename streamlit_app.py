@@ -5,48 +5,6 @@ import seaborn as sns
 import plotly.express as px
 from io import BytesIO
 
-## rob added
-# Function to create map with images
-def create_map_with_images(df):
-    avg_lat = df['Latitude'].mean()
-    avg_lon = df['Longitude'].mean()
-    m = folium.Map(location=[avg_lat, avg_lon], zoom_start=2)
-    
-    for _, row in df.dropna(subset=['Latitude', 'Longitude']).iterrows():
-        icon = CustomIcon(
-            icon_image=row['Image'], 
-            icon_size=(50, 50),  # Adjust the size as needed
-        )
-        folium.Marker(
-            location=[row['Latitude'], row['Longitude']],
-            popup=f"Name: {row['Name']}<br>Faction: {row['Faction']}",
-            icon=icon
-        ).add_to(m)
-    
-    return m
-
-# Function to create map with pins
-def create_map_with_pins(df):
-    avg_lat = df['Latitude'].mean()
-    avg_lon = df['Longitude'].mean()
-    m = folium.Map(location=[avg_lat, avg_lon], zoom_start=2)
-    
-    for _, row in df.dropna(subset=['Latitude', 'Longitude']).iterrows():
-        html = f"""
-        <h4>Name: {row['Name']}</h4>
-        <h5>Faction: {row['Faction']}</h5>
-        <img src="{row['Image']}" width="100" height="100">
-        """
-        iframe = IFrame(html, width=200, height=200)
-        popup = folium.Popup(iframe, max_width=200)
-        
-        folium.Marker(
-            location=[row['Latitude'], row['Longitude']],
-            popup=popup
-        ).add_to(m)
-    
-    return m
-
 
 # Streamlit application title
 st.title("Persona Analysis Dashboard")
@@ -158,14 +116,7 @@ if uploaded_file is not None:
         persona_details_table = persona_details_df[['Name', 'Handle', 'Faction', 'Tags', 'Bio']]
         st.dataframe(persona_details_table)
 
-        # Show as a map
-        display_option = st.radio("Display option", ("Pins", "Images"))
-        if display_option == "Images":
-            map_obj = create_map_with_images(persona_details_table)
-        else:
-            map_obj = create_map_with_pins(persona_details_table)
-        folium_static(map_obj)
-        
+       
 
     # Initial chart creation
     create_charts(filtered_tags_with_factions, factions, filtered_persona_details_df)
